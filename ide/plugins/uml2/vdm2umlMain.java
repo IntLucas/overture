@@ -117,7 +117,21 @@ public class vdm2umlMain
                 MsgPrinter.getPrinter().println("Could not generate UML: "
                         + e.getMessage());
             }
+         
             
+            URI uri = URI.createFileURI(path + "/" + projectName);
+            try
+            {
+                vdm2uml.save(uri);
+            } catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (CoreException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
     public static List<File> filterFiles(List<File> files)
