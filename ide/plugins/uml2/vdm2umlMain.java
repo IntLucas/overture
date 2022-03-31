@@ -7,9 +7,7 @@ import org.overture.config.Release;
 import org.overture.config.Settings;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
-
 import org.overture.ide.plugins.uml2.vdm2uml.Vdm2Uml;
-
 
 import java.io.File;
 import java.util.*;
@@ -19,59 +17,54 @@ public class vdm2umlMain
     public static final String FOLDER_ARG = "-folder";
 	public static final String OUTPUT_ARG = "-output";
 
-        
-
     public static void main(String[] args)
     {
-        
-
         if (args == null || args.length <= 1)
-            {
-                usage("Too few arguments provided");
-            }
+        {
+            usage("Too few arguments provided");
+        }
         
         List<String> listArgs = Arrays.asList(args);
         List<File> files = new LinkedList<File>();
 
         for (Iterator<String> i = listArgs.iterator(); i.hasNext();)
+        {
+            String arg = i.next();
+            
+            if (arg.equals(FOLDER_ARG))
             {
-                String arg = i.next();
-                
-                if (arg.equals(FOLDER_ARG))
+                if (i.hasNext())
                 {
-                    if (i.hasNext())
-                    {
-                        File path = new File(i.next());
+                    File path = new File(i.next());
 
-                        if (path.isDirectory())
-                        {
-                            files.addAll(filterFiles(GeneralUtils.getFiles(path)));
-                        } else
-                        {
-                            usage("Could not find path: " + path);
-                        }
+                    if (path.isDirectory())
+                    {
+                        files.addAll(filterFiles(GeneralUtils.getFiles(path)));
                     } else
                     {
-                        usage(FOLDER_ARG + " requires a directory");
+                        usage("Could not find path: " + path);
                     }
-
-                else if (arg.equals(OUTPUT_ARG))
+                } else
                 {
-                    if (i.hasNext())
-                    {
-                        outputDir = new File(i.next());
-                        outputDir.mkdirs();
-
-                        if (!outputDir.isDirectory())
-                        {
-                            usage(outputDir + " is not a directory");
-                        }
-
-                    } else
-                    {
-                        usage(OUTPUT_ARG + " requires a directory");
-                    }
+                    usage(FOLDER_ARG + " requires a directory");
                 }
+            } else if (arg.equals(OUTPUT_ARG))
+            {
+                if (i.hasNext())
+                {
+                    outputDir = new File(i.next());
+                    outputDir.mkdirs();
+
+                    if (!outputDir.isDirectory())
+                    {
+                        usage(outputDir + " is not a directory");
+                    }
+                } else
+                {
+                    usage(OUTPUT_ARG + " requires a directory");
+                }
+            }
+        }
 
         MsgPrinter.getPrinter().println("Starting UML transformation...\n");
         
@@ -83,56 +76,47 @@ public class vdm2umlMain
         if (outputDir == null)
         {
             usage("No output directory specified");
-            printClasses = true;
         }
 
         handlePp();
 
         MsgPrinter.getPrinter().println("Finished UML transformation! Bye...\n");
-
     }   
 
-
-
     public static void handlePp(List<File> files, File outputDir)
+    {
+        try
         {
-            try
-            {
-                TypeCheckResult<List<AModuleModules>> tcResult = TypeCheckerUtil.typeCheckPp(files);
-                
-                if (GeneralCodeGenUtils.hasErrors(tcResult))
-                {
-                    MsgPrinter.getPrinter().error("Found errors in VDM model:");
-                    MsgPrinter.getPrinter().errorln(GeneralCodeGenUtils.errorStr(tcResult));
-                    return;
-                }
-
-                
-                String projectName = path.getName();
-                <List<SClassDefinition> classList = tcResult.getClasses();
-
-                vdm2uml.convert(projectName, classList)
-                
-            } catch (AnalysisException e) {
-                MsgPrinter.getPrinter().println("Could not generate UML: "
-                        + e.getMessage());
-            }
-         
+            TypeCheckResult<List<AModuleModules>> tcResult = TypeCheckerUtil.typeCheckPp(files);
             
-            URI uri = URI.createFileURI(path + "/" + projectName);
-            try
+            if (GeneralCodeGenUtils.hasErrors(tcResult))
             {
-                vdm2uml.save(uri);
-            } catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (CoreException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                MsgPrinter.getPrinter().error("Found errors in VDM model:");
+                MsgPrinter.getPrinter().errorln(GeneralCodeGenUtils.errorStr(tcResult));
+                return;
             }
+
+            String projectName = path.getName();
+            <List<SClassDefinition> classList = tcResult.getClasses();
+
+            vdm2uml.convert(projectName, classList);
+            
+        } catch (AnalysisException e) {
+            MsgPrinter.getPrinter().println("Could not generate UML: " + e.getMessage());
         }
+        
+        URI uri = URI.createFileURI(path + "/" + projectName);
+        try
+        {
+            vdm2uml.save(uri);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        } catch (CoreException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
     public static List<File> filterFiles(List<File> files)
     {
