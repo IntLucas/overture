@@ -7,6 +7,7 @@ import org.overture.config.Settings;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
 import org.overture.ide.plugins.uml2.vdm2uml.Vdm2Uml;
+import org.eclipse.emf.common.util.URI;
 
 import java.io.File;
 import java.util.*;
