@@ -86,7 +86,7 @@ public class vdm2umlMain
     {
         try
         {
-            TypeCheckResult<List<AModuleModules>> tcResult = TypeCheckerUtil.typeCheckPp(files);
+            TypeCheckResult<List<SClassDefinition>> tcResult = TypeCheckerUtil.typeCheckPp(files);
             
             if (GeneralCodeGenUtils.hasErrors(tcResult))
             {
@@ -96,7 +96,7 @@ public class vdm2umlMain
             }
 
             String projectName = path.getName();
-            <List<SClassDefinition> classList = tcResult.getClasses();
+            List<SClassDefinition> classList = tcResult.getClasses();
 
             vdm2uml.convert(projectName, classList);
             
